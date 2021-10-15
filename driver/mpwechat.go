@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/MichealJl/multi-party-login/proto"
-	"github.com/MichealJl/multi-party-login/proto/mpwechat"
 	"github.com/MichealJl/multi-party-login/utils"
 	"github.com/asaskevich/govalidator"
 )
@@ -63,7 +62,7 @@ func (mp *MpWechatDriver) GetUserInfo(encryptData, iv, sessionKey string) (*prot
 	if err != nil {
 		return nil, err
 	}
-	userInfo := new(mpwechat.MpUserInfo)
+	userInfo := new(proto.MpUserInfo)
 	if er := json.Unmarshal(decryptData, userInfo); er != nil {
 		return nil, er
 	}
@@ -81,17 +80,17 @@ func (mp *MpWechatDriver) GetUserInfo(encryptData, iv, sessionKey string) (*prot
 	}, nil
 }
 
-func (mp *MpWechatDriver) GetPhoneInfo(encryptData, iv, sessionKey string) (*mpwechat.PhoneInfo, error) {
+func (mp *MpWechatDriver) GetPhoneInfo(encryptData, iv, sessionKey string) (*proto.PhoneInfo, error) {
 	decryptData, err := utils.Decrypt(encryptData, iv, sessionKey)
 	if err != nil {
 		return nil, err
 	}
-	phoneInfo := new(mpwechat.PhoneInfo)
+	phoneInfo := new(proto.PhoneInfo)
 	if er := json.Unmarshal(decryptData, phoneInfo); er != nil {
 		return nil, er
 	}
 
-	return &mpwechat.PhoneInfo{
+	return &proto.PhoneInfo{
 		PhoneNumber:     phoneInfo.PhoneNumber,
 		CountryCode:     phoneInfo.CountryCode,
 		PurePhoneNumber: phoneInfo.PurePhoneNumber,

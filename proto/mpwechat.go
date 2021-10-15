@@ -1,4 +1,4 @@
-package mpwechat
+package proto
 
 type MpUserInfo struct {
 	OpenID    string    `json:"openId"`
@@ -16,8 +16,8 @@ type MpUserInfo struct {
 type PhoneInfo struct {
 	PhoneNumber     string    `json:"phoneNumber"`
 	PurePhoneNumber string    `json:"purePhoneNumber"`
-	CountryCode     string    `json:"countryCode"`
-	Watermark       Watermark `json:"watermark"`
+	CountryCode string    `json:"countryCode"`
+	Watermark   Watermark `json:"watermark"`
 }
 
 type Watermark struct {

@@ -16,6 +16,7 @@ const (
 
 var loginDriverMap = map[Platform]LoginDriver{
 	MpWechat: driver.GetMpWechat(),
+	MpQQ:     driver.GetMpQQ(),
 }
 
 type (
@@ -24,6 +25,7 @@ type (
 		SetAppId(appId string)
 		SetSecret(secret string)
 		Login(ctx context.Context, code string) (*proto.LoginRsp, error)
+		GetPhoneInfo(encryptData, iv, sessionKey string) (*proto.PhoneInfo, error)
 	}
 )
 
