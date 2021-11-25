@@ -4,6 +4,7 @@ type LoginRsp struct {
 	ErrCode int64     `json:"err_code"`
 	ErrMsg  string    `json:"err_msg"`
 	Data    LoginData `json:"data"`
+	OriginData string `json:"origin_data"` // 请求的原始返回数据
 }
 
 type LoginData struct {

@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/MichealJl/multi-party-login/proto"
 	"github.com/MichealJl/multi-party-login/utils"
 	"github.com/asaskevich/govalidator"
@@ -12,6 +13,7 @@ const (
 	MpWechatCode2SessionUrl = "https://api.weixin.qq.com/sns/jscode2session"
 )
 
+// MpWechatDriver 微信小程序
 type MpWechatDriver struct {
 	appID  string `valid:"required"`
 	Secret string `valid:"required"`
@@ -29,7 +31,11 @@ func (mp *MpWechatDriver) SetSecret(secret string) {
 	mp.Secret = secret
 }
 
-func (mp *MpWechatDriver) Login(ctx context.Context, code string) (*proto.LoginRsp, error) {
+func (mp *MpWechatDriver) Login(ctx context.Context, params interface{}) (*proto.LoginRsp, error) {
+	data, ok := params.(proto.ReqMpWechatLoginParams)
+	if !ok {
+		return nil, errors.New("login params type error, please use ReqMpWechatLoginParams")
+	}
 	if _, err := govalidator.ValidateStruct(mp); err != nil {
 		return nil, err
 	}
@@ -37,17 +43,19 @@ func (mp *MpWechatDriver) Login(ctx context.Context, code string) (*proto.LoginR
 		Url:       MpWechatCode2SessionUrl,
 		AppId:     mp.appID,
 		Secret:    mp.Secret,
-		Code:      code,
+		Code:      data.Code,
 		GrantType: "authorization_code",
 	}
 	c2sRsp, err := c2s.CommonCode2Session(ctx)
 	if err != nil {
 		return nil, err
 	}
+	originData, _ := json.Marshal(c2sRsp)
 
 	return &proto.LoginRsp{
-		ErrCode: c2sRsp.ErrCode,
-		ErrMsg:  c2sRsp.ErrMsg,
+		ErrCode:    c2sRsp.ErrCode,
+		ErrMsg:     c2sRsp.ErrMsg,
+		OriginData: string(originData),
 		Data: proto.LoginData{
 			OpenID:      c2sRsp.OpenId,
 			UnionID:     c2sRsp.UnionId,

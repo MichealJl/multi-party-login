@@ -1,5 +1,9 @@
 package proto
 
+type ReqMpWechatLoginParams struct {
+	Code string `json:"code" valid:"required"`
+}
+
 type MpUserInfo struct {
 	OpenID    string    `json:"openId"`
 	UnionID   string    `json:"unionId,omitempty"`
@@ -16,12 +20,11 @@ type MpUserInfo struct {
 type PhoneInfo struct {
 	PhoneNumber     string    `json:"phoneNumber"`
 	PurePhoneNumber string    `json:"purePhoneNumber"`
-	CountryCode string    `json:"countryCode"`
-	Watermark   Watermark `json:"watermark"`
+	CountryCode     string    `json:"countryCode"`
+	Watermark       Watermark `json:"watermark"`
 }
 
 type Watermark struct {
 	AppId     string `json:"appid"`
 	Timestamp int64  `json:"timestamp"`
 }
-
