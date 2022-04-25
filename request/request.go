@@ -48,24 +48,28 @@ func (h *HttpClient) Cal(ctx context.Context, requestUrl string, target interfac
 	if err != nil {
 		return err
 	}
-	request, err := http.NewRequest(string(h.Method), requestUrl, bytes.NewReader(reqBody))
+	request, err := http.NewRequestWithContext(ctx, string(h.Method), requestUrl, bytes.NewReader(reqBody))
 	if err != nil {
 		return err
 	}
+
 	request.Header.Set("Accept", string(h.RspType))
 	request.Header.Set("Content-Type", string(h.ReqType))
 	for k, v := range h.Headers {
 		request.Header.Set(k, v)
 	}
+
 	response, err := h.Do(request)
 	if err != nil {
 		return err
 	}
 	defer response.Body.Close()
+
 	rspBody, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return err
 	}
+
 	if err := json.Unmarshal(rspBody, &target); err != nil {
 		return err
 	}
@@ -77,22 +81,22 @@ func (h *HttpClient) SetMethod(method ReqMethod) {
 	h.Method = method
 }
 
-// 设置请求body
+// SetBody 设置请求body
 func (h *HttpClient) SetBody(body map[string]interface{}) {
 	h.Body = body
 }
 
-// 设置超时时间
+// SetTimeOut 设置超时时间
 func (h *HttpClient) SetTimeOut(timeOut int) {
 	h.Client.Timeout = time.Second * time.Duration(timeOut)
 }
 
-// 设置请求头类型
+// SetReqContentType 设置请求头类型
 func (h *HttpClient) SetReqContentType(contentType ContentType) {
 	h.ReqType = contentType
 }
 
-// 设置response返回类型
+// SetRspContentType 设置response返回类型
 func (h *HttpClient) SetRspContentType(contentType ContentType) {
 	h.RspType = contentType
 }

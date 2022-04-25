@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/MichealJl/multi-party-login/proto"
 	"github.com/MichealJl/multi-party-login/request"
-	"github.com/MichealJl/multi-party-login/utils"
 	"github.com/asaskevich/govalidator"
 )
 
@@ -57,26 +56,7 @@ func (mp *QQDriver) Login(ctx context.Context, params interface{}) (*proto.Login
 }
 
 func (mp *QQDriver) GetUserInfo(encryptData, iv, sessionKey string) (*proto.GetUserInfoRsp, error) {
-	decryptData, err := utils.Decrypt(encryptData, iv, sessionKey)
-	if err != nil {
-		return nil, err
-	}
-	userInfo := new(proto.MpUserInfo)
-	if er := json.Unmarshal(decryptData, userInfo); er != nil {
-		return nil, er
-	}
-
-	return &proto.GetUserInfoRsp{
-		OpenID:    userInfo.OpenID,
-		UnionID:   userInfo.UnionID,
-		NickName:  userInfo.NickName,
-		Gender:    userInfo.Gender,
-		City:      userInfo.City,
-		Province:  userInfo.Province,
-		Country:   userInfo.Country,
-		AvatarURL: userInfo.AvatarURL,
-		Language:  userInfo.Language,
-	}, nil
+	return &proto.GetUserInfoRsp{}, nil
 }
 
 // GetPhoneInfo 目前qq小程序获取手机号内侧中
