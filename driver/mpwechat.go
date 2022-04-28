@@ -3,7 +3,6 @@ package driver
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/MichealJl/multi-party-login/proto"
 	"github.com/MichealJl/multi-party-login/utils"
 	"github.com/asaskevich/govalidator"
@@ -13,37 +12,28 @@ const (
 	MpWechatCode2SessionUrl = "https://api.weixin.qq.com/sns/jscode2session"
 )
 
-// MpWechatDriver 微信小程序
-type MpWechatDriver struct {
-	appID  string `valid:"required"`
-	Secret string `valid:"required"`
+// mpWechatDriver 微信小程序
+type mpWechatDriver struct {
+	conf *proto.Conf
 }
 
-func GetMpWechat() *MpWechatDriver {
-	return new(MpWechatDriver)
+func GetMpWechat() *mpWechatDriver {
+	return new(mpWechatDriver)
 }
 
-func (mp *MpWechatDriver) SetAppId(appId string) {
-	mp.appID = appId
+func (mp *mpWechatDriver) SetConf(conf *proto.Conf) {
+	mp.conf = conf
 }
 
-func (mp *MpWechatDriver) SetSecret(secret string) {
-	mp.Secret = secret
-}
-
-func (mp *MpWechatDriver) Login(ctx context.Context, params interface{}) (*proto.LoginRsp, error) {
-	data, ok := params.(proto.ReqMpWechatLoginParams)
-	if !ok {
-		return nil, errors.New("login params type error, please use ReqMpWechatLoginParams")
-	}
+func (mp *mpWechatDriver) Login(ctx context.Context, params interface{}) (*proto.LoginRsp, error) {
 	if _, err := govalidator.ValidateStruct(mp); err != nil {
 		return nil, err
 	}
 	c2s := Code2Session{
 		Url:       MpWechatCode2SessionUrl,
-		AppId:     mp.appID,
-		Secret:    mp.Secret,
-		Code:      data.Code,
+		AppId:     mp.conf.AppID,
+		Secret:    mp.conf.Secret,
+		Code:      params.(string),
 		GrantType: "authorization_code",
 	}
 	c2sRsp, err := c2s.CommonCode2Session(ctx)
@@ -65,7 +55,7 @@ func (mp *MpWechatDriver) Login(ctx context.Context, params interface{}) (*proto
 	}, nil
 }
 
-func (mp *MpWechatDriver) GetUserInfo(encryptData, iv, sessionKey string) (*proto.GetUserInfoRsp, error) {
+func (mp *mpWechatDriver) GetUserInfo(encryptData, iv, sessionKey string) (*proto.GetUserInfoRsp, error) {
 	decryptData, err := utils.Decrypt(encryptData, iv, sessionKey)
 	if err != nil {
 		return nil, err
@@ -88,7 +78,7 @@ func (mp *MpWechatDriver) GetUserInfo(encryptData, iv, sessionKey string) (*prot
 	}, nil
 }
 
-func (mp *MpWechatDriver) GetPhoneInfo(encryptData, iv, sessionKey string) (*proto.PhoneInfo, error) {
+func (mp *mpWechatDriver) GetPhoneInfo(encryptData, iv, sessionKey string) (*proto.PhoneInfo, error) {
 	decryptData, err := utils.Decrypt(encryptData, iv, sessionKey)
 	if err != nil {
 		return nil, err

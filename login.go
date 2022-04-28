@@ -23,8 +23,7 @@ var loginDriverMap = map[Platform]LoginDriver{
 type (
 	Platform    int8
 	LoginDriver interface {
-		SetAppId(appId string)
-		SetSecret(secret string)
+		SetConf(*proto.Conf)
 		Login(ctx context.Context, params interface{}) (*proto.LoginRsp, error)
 		GetPhoneInfo(encryptData, iv, sessionKey string) (*proto.PhoneInfo, error)
 	}

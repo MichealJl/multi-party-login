@@ -3,7 +3,6 @@ package driver
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/MichealJl/multi-party-login/proto"
 	"github.com/MichealJl/multi-party-login/utils"
 	"github.com/asaskevich/govalidator"
@@ -13,37 +12,28 @@ const (
 	MpQQCode2SessionUrl = "https://api.q.qq.com/sns/jscode2session"
 )
 
-// MpQQDriver qq小程序
-type MpQQDriver struct {
-	appID  string `valid:"required"`
-	Secret string `valid:"required"`
+// mpQQDriver qq小程序
+type mpQQDriver struct {
+	conf *proto.Conf
 }
 
-func GetMpQQ() *MpQQDriver {
-	return new(MpQQDriver)
+func GetMpQQ() *mpQQDriver {
+	return new(mpQQDriver)
 }
 
-func (mp *MpQQDriver) SetAppId(appId string) {
-	mp.appID = appId
+func (mp *mpQQDriver) SetConf(conf *proto.Conf) {
+	mp.conf = conf
 }
 
-func (mp *MpQQDriver) SetSecret(secret string) {
-	mp.Secret = secret
-}
-
-func (mp *MpQQDriver) Login(ctx context.Context, params interface{}) (*proto.LoginRsp, error) {
-	data, ok := params.(proto.ReqMpQQLoginParams)
-	if !ok {
-		return nil, errors.New("login params type error, please use ReqMpQQLoginParams")
-	}
+func (mp *mpQQDriver) Login(ctx context.Context, params interface{}) (*proto.LoginRsp, error) {
 	if _, err := govalidator.ValidateStruct(mp); err != nil {
 		return nil, err
 	}
 	c2s := Code2Session{
 		Url:       MpQQCode2SessionUrl,
-		AppId:     mp.appID,
-		Secret:    mp.Secret,
-		Code:      data.Code,
+		AppId:     mp.conf.AppID,
+		Secret:    mp.conf.Secret,
+		Code:      params.(string),
 		GrantType: "authorization_code",
 	}
 	c2sRsp, err := c2s.CommonCode2Session(ctx)
@@ -65,7 +55,7 @@ func (mp *MpQQDriver) Login(ctx context.Context, params interface{}) (*proto.Log
 	}, nil
 }
 
-func (mp *MpQQDriver) GetUserInfo(encryptData, iv, sessionKey string) (*proto.GetUserInfoRsp, error) {
+func (mp *mpQQDriver) GetUserInfo(encryptData, iv, sessionKey string) (*proto.GetUserInfoRsp, error) {
 	decryptData, err := utils.Decrypt(encryptData, iv, sessionKey)
 	if err != nil {
 		return nil, err
@@ -89,6 +79,6 @@ func (mp *MpQQDriver) GetUserInfo(encryptData, iv, sessionKey string) (*proto.Ge
 }
 
 // GetPhoneInfo 目前qq小程序获取手机号内侧中
-func (mp *MpQQDriver) GetPhoneInfo(encryptData, iv, sessionKey string) (*proto.PhoneInfo, error) {
+func (mp *mpQQDriver) GetPhoneInfo(encryptData, iv, sessionKey string) (*proto.PhoneInfo, error) {
 	return &proto.PhoneInfo{}, nil
 }
